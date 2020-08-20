@@ -1,0 +1,154 @@
+<div class="navbar">
+    <span class="header__title hide-on-small-only">
+        Grid Assessor
+    </span>
+    <span on:click="goToLevel(2)" class="breadcrumb thick link">
+        <span>United States</span>
+    </span>
+    {{#each crumbs as crumb, step}}
+        <span on:click="goToLevel(step + 3)" class="breadcrumb thick link">
+            <span>{{crumb}}</span>
+        </span>
+    {{/each}}
+    <Search/>
+    <a
+        class="help"
+        on:click="openHelpModal()">
+        Help!
+    </a>
+</div>
+
+<!-- Help Modal -->
+<div ref:helpModal id="helpModal" class="modal">
+    <div class="modal-content help__modal">
+      <h4>Commonly Asked Questions</h4>
+        <ol>
+            <p><li>Why am I not seeing substations?</li>
+            <span>If you are entitled to substation data and are not able to see
+            them, it may be because you haven't selected a state. Select a state
+            on the map and substations should appear.</span><p>
+            <p><li>Why am I not seeing feeders?</li>
+            <span>If you are entitled to feeder data and are not able to see them,
+            it may be because you have not yet selected a county. Once you select 
+            a county from the map, feeders should start to appear.</span></p>
+            <p><span>If you would like to see feeders and have not yet subscribed
+            to feeder data, email <a href="mailto:support@kevalaanalytics.com">
+            support@kevalaanalytics.com</a> to upgrade your subscription.</span></p>
+            <p><li>Why am I not seeing parcels?</li>
+            <span>Parcels appear at a high zoom level, typically once the map is 
+            zoomed in enough to see street names. If you see the 'Reload Parcel'
+            button and still no parcels, it may be that we don't have parcels
+            for that area.</span></p>
+            <p><li>I am a subscriber to Network Assessor but don't see it. How do I view it?</li>
+            <span>Once you select a Network Assessor feature on the map or in the side panel, the Network Assessor button will appear in the map's lower left hand corner. Simply click this button to view the Network Assessor overlay. You must be a Network Assessor subscriber to view this feature.</span></p>
+            <p><li>I have a question that isn't covered here.
+            Who can I contact?</li>
+            <span>Email
+            <a href="mailto:support@kevalaanalytics.com">
+            support@kevalaanalytics.com</a> to receive customer support.</span></p>
+        </ol> 
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+    </div>
+</div>
+
+<script>
+    import Search from './Search.html'
+
+    export default {
+        components: {
+            Search
+        },
+        /**
+         * Component-wide attributes.
+         * get these with this.get('foo')
+         * and set them with this.set({foo: bar})
+         */
+        data () {
+            return {
+                crumbs: [],
+                currentLevel: 2,
+                // Example value provided here
+                geography: {
+                    state: {
+                        name: 'California'
+                    },
+                    county: {
+                        name: 'San Francisco'
+                    },
+                    zcta: {
+                        id: 94122
+                    }
+                },
+            }
+        },
+        /**
+         * The names of the parameter(s) for these "computed properties" correspond
+         * to attribute(s) in the "data" section (above).
+         * When one of these attributes changes, the property is recomputed.
+         */
+        computed: {
+            currentLevel: (crumbs) => (crumbs.length + 1)
+        },
+        methods: {
+            /**
+             * Pulls a list of breadcrumbs based on the geocode information
+             * contained within the given geography.
+             * @param {Object} geography
+             * @return {Array<string>}
+             */
+            getBreadcrumbsFromGeography = (geography) => {
+                if (!geography) return []
+                const crumbs = []
+                if (geography['state']) {
+                    const crumb = geography['state'].name
+                    crumbs.push(crumb)
+                }
+                if (geography['county']) {
+                    const crumb = geography['county'].name
+                    crumb += ' (county)'
+                    crumbs.push(crumb)
+                }
+                if (geography['city']) {
+                    const crumb = geography['city'].name
+                    crumb += ' (city)'
+                    crumbs.push(crumb)
+                }
+                if (geography['zcta']) {
+                    const crumb = geography['state'].id
+                    crumb += ' (zip code)'
+                    crumbs.push(crumb)
+                }
+                return crumbs
+            },
+            /**
+             * Opens the help modal
+             */
+            openHelpModal () {
+                this.get('helpModal').modal('open')
+            },
+            /**
+             * Navigates to the level corresponding to the clicked breadcrumb
+             */
+            goToLevel (level) {
+                const currentLevel = this.get('currentLevel')
+                if (level === currentLevel) return
+                // TODO: in a different PR, apply the level changes
+                // store.dispatch(...)
+            },
+        },
+        /**
+         * This function is called once, when the component is first created
+         */
+        oncreate () {
+            // Initialize the modal...
+            $(this.refs.helpModal).modal()
+            this.set({helpModal: $(this.refs.helpModal)})
+            // Initialize the breadcrumbs...
+            const crumbs = this.getBreadcrumbsFromGeography(
+                this.get('geography'))
+            this.set({crumbs})
+        }
+    }
+</script>
