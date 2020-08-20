@@ -1,2 +1,2 @@
 # navbar
-A navbar that can search for things, give you help, and more!
+Intentionally mediocre dummy code, for training/discussion purposes.
