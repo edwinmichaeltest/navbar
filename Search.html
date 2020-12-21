@@ -1,0 +1,56 @@
+<div class="row search-wrapper">
+    <input
+        ref:searchInput
+        class="search-input"
+        value=""
+        on:keyup="handleSearchInput(event)"/>
+</div>
+
+
+<script>
+    import {
+        fetchAutocomplete,
+        performSearch,
+    } from '../actions'
+    import store from '../reducers'
+
+    const ENTER = 13
+
+    export default {
+        methods: {
+            /**
+             * Deals with input to the search bar
+             * @param {Object} event The keyup event.
+             */
+            handleSearchInput (event) {
+                let searchQuery = $(this.refs.searchInput).val()
+                if (event.keyCode === ENTER) {
+                    // Dispatch an action - other components will deal
+                    // with the results
+                    store.dispatch(performSearch(searchQuery))
+                } else {
+                    this.handleAutocomplete(searchQuery)
+                }
+            },
+            /**
+             * Fetches a list of autocomplete suggestions.
+             * @param {string} searchQuery The current text in the search input.
+             * @return {Promise} A Promise that will resolve when autocomplete
+             *      suggestions are received.
+             */
+            handleAutocomplete(searchQuery) {
+                return store.dispatch(fetchAutocomplete(searchQuery))
+                    .then((autocompleteSuggestions) => {
+                        $(this.refs.searchInput).val(autocompleteSuggestions[0])
+                    })
+                    .catch((reason) => console.log(reason))
+            },
+        },
+        /**
+         * This function is called once, when the component is first created
+         */
+        oncreate () {
+            $(this.refs.searchInput).val('')
+        }
+    }
+</script>

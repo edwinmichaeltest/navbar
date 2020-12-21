@@ -1,0 +1,142 @@
+<div class="navbar">
+    <span class="header__title hide-on-small-only">
+        Grid Assessor
+    </span>
+    <span on:click="goToLevel(2)" class="breadcrumb thick link">
+        <span>United States</span>
+    </span>
+    {{#each crumbs as crumb, step}}
+        <span on:click="goToLevel(step + 3)" class="breadcrumb thick link">
+            <span>{{crumb}}</span>
+        </span>
+    {{/each}}
+    <Search/>
+    <a
+        class="help"
+        on:click="openHelpModal()">
+        Help!
+    </a>
+</div>
+
+<!-- Help Modal -->
+<div ref:helpModal id="helpModal" class="modal">
+    <div class="modal-content help__modal">
+      <h4>Commonly Asked Questions</h4>
+        <ol>
+            <p><li>What's so great about Kevala?</li>
+            <span>Kevala has many cool products relating to the electric grid,
+            which you can sort of read about on our website. The coolest of these
+            is Network Assessor, which helps utilities and regulators collaborate
+            in planning the clean and smart grid of 2022-2050.</span><p>
+            <p><li>Why am I not seeing data?</li>
+            <p><span>If you would like to see data and have not yet subscribed
+            to data, email support to upgrade your subscription.</span></p>
+            <p><li>Why is your code so bad?</li>
+            <span>This is dummy code for an interview question!</span></p>
+            <p><li>I have a question that isn't covered here. Who can I contact?</li>
+            <span>Email customer support to receive customer support.</span></p>
+            <p><li>Why are your answers so bad?</li>
+            <span>This is dummy text for an interview question!</span></p>
+        </ol> 
+    </div>
+</div>
+
+<script>
+    import Search from './Search.html'
+
+    export default {
+        components: {
+            Search
+        },
+        /**
+         * Component-wide attributes.
+         * get these with this.get('foo')
+         * and set them with this.set({foo: bar})
+         */
+        data () {
+            return {
+                crumbs: [],
+                currentLevel: 2,
+                // Example value provided here
+                geography: {
+                    state: {
+                        name: 'California'
+                    },
+                    county: {
+                        name: 'San Francisco'
+                    },
+                    zcta: {
+                        id: 94122
+                    }
+                },
+            }
+        },
+        /**
+         * The names of the parameter(s) for these "computed properties" correspond
+         * to attribute(s) in the "data" section (above).
+         * When one of these attributes changes, the property is recomputed.
+         */
+        computed: {
+            currentLevel: (crumbs) => (crumbs.length + 1)
+        },
+        methods: {
+            /**
+             * Pulls a list of breadcrumbs based on the geocode information
+             * contained within the given geography.
+             * @param {Object} geography
+             * @return {Array<string>}
+             */
+            getBreadcrumbsFromGeography = (geography) => {
+                if (!geography) return []
+                const crumbs = []
+                if (geography['state']) {
+                    const crumb = geography['state'].name
+                    crumbs.push(crumb)
+                }
+                if (geography['county']) {
+                    const crumb = geography['county'].name
+                    crumb += ' (county)'
+                    crumbs.push(crumb)
+                }
+                if (geography['city']) {
+                    const crumb = geography['city'].name
+                    crumb += ' (city)'
+                    crumbs.push(crumb)
+                }
+                if (geography['zcta']) {
+                    const crumb = geography['state'].id
+                    crumb += ' (zip code)'
+                    crumbs.push(crumb)
+                }
+                return crumbs
+            },
+            /**
+             * Opens the help modal
+             */
+            openHelpModal () {
+                this.get('helpModal').modal('open')
+            },
+            /**
+             * Navigates to the level corresponding to the clicked breadcrumb
+             */
+            goToLevel (level) {
+                const currentLevel = this.get('currentLevel')
+                if (level === currentLevel) return
+                // TODO: in a different PR, apply the level changes
+                // store.dispatch(...)
+            },
+        },
+        /**
+         * This function is called once, when the component is first created
+         */
+        oncreate () {
+            // Initialize the modal...
+            $(this.refs.helpModal).modal()
+            this.set({helpModal: $(this.refs.helpModal)})
+            // Initialize the breadcrumbs...
+            const crumbs = this.getBreadcrumbsFromGeography(
+                this.get('geography'))
+            this.set({crumbs})
+        }
+    }
+</script>
